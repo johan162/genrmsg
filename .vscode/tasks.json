@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cargo build --release (size optimized)",
+            "type": "shell",
+            "command": "cargo build --release -Zbuild-std=std,panic_abort -Zbuild-std-features=panic_immediate_abort",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": ["$rustc"],
+            "detail": "Builds the project in release mode with size optimizations (requires nightly toolchain)",
+            "options": {
+                "env": {
+                    "RUSTFLAGS": "-C opt-level=z -C panic=abort -C linker=clang -C link-arg=-s"
+                }
+            }
+        }
+    ]
+}

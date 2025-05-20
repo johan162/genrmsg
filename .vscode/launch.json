@@ -1,0 +1,65 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'genrmsg'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=genrmsg",
+                    "--package=genrmsg"
+                ],
+                "filter": {
+                    "name": "genrmsg",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'genrmsg'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=genrmsg",
+                    "--package=genrmsg"
+                ],
+                "filter": {
+                    "name": "genrmsg",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'msg_lib'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=msg_lib",
+                    "--package=genrmsg"
+                ],
+                "filter": {
+                    "name": "msg_lib",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
