@@ -78,12 +78,12 @@ fn assign_message_numbers(
             if enable_prefix {
                 // Format the number with leading zeros according to num_digits
                 let number_str = match num_digits {
-                    1 => format!("{}", current_number),
-                    2 => format!("{:02}", current_number),
-                    3 => format!("{:03}", current_number),
-                    4 => format!("{:04}", current_number),
-                    5 => format!("{:05}", current_number),
-                    6 => format!("{:06}", current_number),
+                    1 => format!("{current_number}"),
+                    2 => format!("{current_number:02}"),
+                    3 => format!("{current_number:03}"),
+                    4 => format!("{current_number:04}"),
+                    5 => format!("{current_number:05}"),
+                    6 => format!("{current_number:06}"),
                     _ => format!("{:0width$}", current_number, width = num_digits as usize),
                 };
 
