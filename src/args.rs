@@ -47,8 +47,8 @@ pub struct Args {
     #[clap(short = 'm', long = "prefix-messages", action = clap::ArgAction::Set, default_value = "true")]
     pub prefix_messages: bool,
 
-    /// Generate a Markdown table documenting all messages
-    #[clap(short = 't', long = "mdtable", action = clap::ArgAction::Set, default_value = "false")]
+    /// Generate a Markdown table documenting all messages. Same name as the input file with .md extension.
+    #[clap(short = 't', long = "mdtable", action = clap::ArgAction::SetTrue, default_value = "false")]
     pub mdtable: bool,
 
     /// Sets the verbosity level, 0=Error, 1=Warn, 2=Info, 3=Debug, 4=Trace (default is 0)
