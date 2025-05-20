@@ -7,6 +7,11 @@ pub fn format_payload_fields(fields: &HashMap<String, FieldSpec>) -> String {
         return "*empty*".to_string();
     }
 
+    // Sort fields by name for consistent ordering
+    let mut sorted_fields: Vec<_> = fields.iter().collect();
+    sorted_fields.sort_by(|a, b| a.0.cmp(b.0));
+    let fields = sorted_fields;
+
     // Format fields as a list of "name: type" pairs
     let field_strings: Vec<String> = fields
         .iter()
@@ -20,14 +25,8 @@ pub fn format_payload_fields(fields: &HashMap<String, FieldSpec>) -> String {
 pub fn generate_message_markdown_table(spec: &MessageDefinition) -> String {
     let mut markdown = String::new();
 
-    // Add table header
+    // Add section title
     markdown.push_str("# Message Specification\n\n");
-    markdown.push_str(
-        "| Seq | Request Name | Request Payload | Reply Name | Reply Payload | Description |\n",
-    );
-    markdown.push_str(
-        "|-----|-------------|----------------|------------|---------------|-------------|\n",
-    );
 
     // Sequence number for human readability
     let mut seq = 1;
@@ -39,7 +38,7 @@ pub fn generate_message_markdown_table(spec: &MessageDefinition) -> String {
 
         // Add table header again for each category
         markdown.push_str(
-            "| Seq | Request Name | Request Payload | Reply Name | Reply Payload | Description |\n",
+            "| # | Request Name | Request Payload | Reply Name | Reply Payload | Description |\n",
         );
         markdown.push_str(
             "|-----|-------------|----------------|------------|---------------|-------------|\n",
