@@ -2,15 +2,18 @@ pub mod args;
 pub mod generate;
 pub mod markdown;
 pub mod spec;
+pub mod validate;
 
 use crate::args::Args;
 use crate::generate::{assign_message_numbers, generate_rust_code};
 use crate::markdown::generate_message_markdown_table;
 use crate::spec::MessageDefinition;
 use clap::Parser;
-use log::info;
+use log::{info};
 use std::fs;
 use std::path::Path;
+use validate::validate_schema;
+use colored::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
@@ -32,6 +35,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Read the YAML file
     let yaml_content = fs::read_to_string(input_file)?;
+
+    // Add validation check
+    if args.validate_only {
+        match validate_schema(&yaml_content) {
+            Ok(_) => {
+                println!("{}", "Schema validation successful!".green());
+                return Ok(());
+            }
+            Err(e) => {
+                println!("{}", format!("Schema validation error: {e}").red());
+                return Err(e.into());
+            }
+        }
+    }
 
     // Parse the YAML specification
     let mut spec: MessageDefinition = serde_yaml::from_str(&yaml_content)?;

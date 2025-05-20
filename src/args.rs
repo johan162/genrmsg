@@ -59,4 +59,9 @@ pub struct Args {
         default_value = "0"
     )]
     pub verbose: u8,
+
+    /// Verify that the YAML file follows the schema but don't generate code
+    #[clap(long = "validate", action = clap::ArgAction::SetTrue, default_value = "false")]
+    pub validate_only: bool,
+
 }
