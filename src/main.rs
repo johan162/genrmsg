@@ -16,11 +16,9 @@ use std::path::Path;
 use validate::validate_schema;
 use colored::*;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args = Args::parse();
-
-    // Initialize logging based on verbosity
-    let log_level = match args.verbose {
+/// Initialize the logger based on verbosity level
+fn init_logging(verbose: u8) {
+    let log_level = match verbose {
         0 => log::LevelFilter::Error,
         1 => log::LevelFilter::Warn,
         2 => log::LevelFilter::Info,
@@ -29,31 +27,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     env_logger::Builder::new().filter_level(log_level).init();
+}
 
-    info!("Reading message specification from: \"{}\"", args.input);
-
-    let input_file = &args.input;
-
-    // Read the YAML file
-    let yaml_content = fs::read_to_string(input_file)?;
-
-    // Add validation check
-    if args.validate_only {
-        match validate_schema(&yaml_content) {
-            Ok(_) => {
-                println!("{}", "Schema validation successful!".green());
-                return Ok(());
-            }
-            Err(e) => {
-                println!("{}", format!("Schema validation error: {e}").red());
-                return Err(e.into());
-            }
+/// Validate the schema of a YAML file
+fn validate_schema_file(yaml_content: &str) -> Result<(), Box<dyn std::error::Error>> {
+    match validate_schema(yaml_content) {
+        Ok(_) => {
+            println!("{}", "Schema validation successful!".green());
+            Ok(())
+        }
+        Err(e) => {
+            println!("{}", format!("Schema validation error: {e}").red());
+            Err(e.into())
         }
     }
+}
 
+/// Read and parse the message definition file
+fn process_input_file(
+    args: &Args,
+    input_file: &str,
+) -> Result<MessageDefinition, Box<dyn std::error::Error>> {
+    info!("Reading message specification from: \"{}\"", input_file);
+    
+    // Read the YAML file
+    let yaml_content = fs::read_to_string(input_file)?;
+    
+    // Check validation if requested
+    if args.validate_only {
+        validate_schema_file(&yaml_content)?;
+        std::process::exit(0);
+    }
+    
     // Parse the YAML specification
     let mut spec: MessageDefinition = serde_yaml::from_str(&yaml_content)?;
-
+    
     // Assign message numbers, respecting the prefix_messages flag
     assign_message_numbers(
         &mut spec,
@@ -62,39 +70,76 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         args.num_digits,
         args.prefix_messages,
     );
+    
+    Ok(spec)
+}
 
-    // Generate Rust code
+/// Generate Rust code and write it to the output file
+fn generate_code(
+    args: &Args,
+    spec: &MessageDefinition,
+) -> Result<String, Box<dyn std::error::Error>> {
+    // Determine output file path
     let output_file = args
         .output
+        .clone()
         .unwrap_or_else(|| spec.settings.output_file.clone());
-    let rust_code = generate_rust_code(&spec);
-
+    
+    let rust_code = generate_rust_code(spec);
+    
     // Create parent directories if they don't exist
     if let Some(parent) = Path::new(&output_file).parent() {
         fs::create_dir_all(parent)?;
     }
-
+    
     // Write the output file
-    fs::write(&output_file, rust_code)?;
+    fs::write(&output_file, &rust_code)?;
+    
+    info!("Successfully generated message code to: \"{output_file}\"");
+    
+    Ok(output_file)
+}
 
-    info!(
-        "Successfully generated message code to: \"{output_file}\""
-    );
-
-    // Generate Markdown table of messages
-    if args.mdtable {
-        info!("Generating Markdown table of messages");
-        let markdown_table = generate_message_markdown_table(&spec);
-        // Convert String to PathBuf before using with_extension
-        let markdown_file = std::path::PathBuf::from(&output_file).with_extension("md");
-        fs::write(&markdown_file, markdown_table)?;
-        info!(
-            "Successfully generated message specification table to: \"{}\"",
-            markdown_file.display()
-        );
-    } else {
+/// Generate Markdown table documentation if requested
+fn generate_markdown_table(
+    args: &Args,
+    spec: &MessageDefinition,
+    output_file: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if !args.mdtable {
         info!("Skipping Markdown table generation");
+        return Ok(());
     }
+    
+    info!("Generating Markdown table of messages");
+    let markdown_table = generate_message_markdown_table(spec);
+    
+    // Convert String to PathBuf before using with_extension
+    let markdown_file = std::path::PathBuf::from(output_file).with_extension("md");
+    fs::write(&markdown_file, markdown_table)?;
+    
+    info!(
+        "Successfully generated message specification table to: \"{}\"",
+        markdown_file.display()
+    );
+    
+    Ok(())
+}
 
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args = Args::parse();
+    
+    // Initialize logging
+    init_logging(args.verbose);
+    
+    // Process input file
+    let spec = process_input_file(&args, &args.input)?;
+    
+    // Generate code
+    let output_file = generate_code(&args, &spec)?;
+    
+    // Generate Markdown table if requested
+    generate_markdown_table(&args, &spec, &output_file)?;
+    
     Ok(())
 }
