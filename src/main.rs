@@ -1,4 +1,5 @@
 pub mod args;
+pub mod code_builder;
 pub mod generate;
 pub mod markdown;
 pub mod spec;

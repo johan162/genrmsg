@@ -38,10 +38,10 @@ pub fn generate_message_markdown_table(spec: &MessageDefinition) -> String {
 
         // Add table header again for each category
         markdown.push_str(
-            "| # | Request Name | Request Payload | Reply Name | Reply Payload | Description |\n",
+            "| # | Description | Request Name | Request Payload | Reply Name | Reply Payload |\n",
         );
         markdown.push_str(
-            "|-----|-------------|----------------|------------|---------------|-------------|\n",
+            "|----|-------------|----------------|------------|---------------|-------------|\n",
         );
 
         for message in &category.messages {
@@ -54,13 +54,13 @@ pub fn generate_message_markdown_table(spec: &MessageDefinition) -> String {
 
             // Add row
             markdown.push_str(&format!(
-                "| {} | `{}` | {} | `{}` | {} | {} |\n",
+                "| {} | {} | `{}` | {} | `{}` | {} |\n",
                 seq,
+                message.description,
                 request_name,
                 request_payload,
                 response_name,
                 reply_payload,
-                message.description
             ));
 
             seq += 1;
