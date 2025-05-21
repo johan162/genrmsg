@@ -1,6 +1,6 @@
 pub use crate::spec::{EnumSpec, FieldSpec, MessageDefinition, StructSpec};
 use crate::code_builder::CodeBuilder;
-use log::debug;
+use log::{debug, info};
 
 pub fn assign_message_numbers(
     spec: &mut MessageDefinition,
@@ -8,35 +8,67 @@ pub fn assign_message_numbers(
     start_number: u32,
     num_digits: u8,
     enable_prefix: bool,
-) {
-    let mut current_number = start_number;
-
-    for category in &mut spec.messages {
-        for message in &mut category.messages {
-            if enable_prefix {
-                // Format the number with leading zeros according to num_digits
-                let number_str = match num_digits {
-                    1 => format!("{current_number}"),
-                    2 => format!("{current_number:02}"),
-                    3 => format!("{current_number:03}"),
-                    4 => format!("{current_number:04}"),
-                    5 => format!("{current_number:05}"),
-                    6 => format!("{current_number:06}"),
-                    _ => format!("{:0width$}", current_number, width = num_digits as usize),
-                };
-
-                // Create the new message name: PREFIX + NUMBER + _ + ORIGINAL_NAME
-                message.generated_name =
-                    format!("{}{}_{}", prefix, number_str, message.original_name);
-            } else {
-                // Just use the original name without prefixing
-                message.generated_name = message.original_name.clone();
+) -> u32 {  // Return highest assigned number
+    // First scan: Find all explicitly assigned numbers and the highest one
+    let mut highest_explicit_number = 0;
+    let mut used_numbers = std::collections::HashSet::new();
+    
+    for category in &spec.messages {
+        for message in &category.messages {
+            if let Some(number) = message.number {
+                highest_explicit_number = highest_explicit_number.max(number);
+                
+                // Track used numbers to avoid duplicates
+                if !used_numbers.insert(number) {
+                    log::warn!("Duplicate message number {} found for {}", 
+                              number, message.original_name);
+                }
             }
-
-            debug!("Assigning message name: {}", message.generated_name);
-            current_number += 1;
         }
     }
+    
+    info!("Highest explicit message number: {}", highest_explicit_number);
+    debug!("Used message numbers: {:?}", used_numbers);
+
+    // Start with max(start_number, highest_explicit_number + 1)
+    let mut current_number = start_number.max(highest_explicit_number + 1);
+    let mut highest_assigned_number = highest_explicit_number;
+
+    // Second scan: Assign numbers to messages without explicit numbering
+    for category in &mut spec.messages {
+        for message in &mut category.messages {
+            // Get or assign message number
+            let message_number = if let Some(number) = message.number {
+                number // Use explicit number
+            } else {
+                // Find next available number (skip any that are already used)
+                while used_numbers.contains(&current_number) {
+                    current_number += 1;
+                }
+                
+                let number = current_number;
+                message.number = Some(number); // Store the assigned number
+                used_numbers.insert(number);
+                current_number += 1;
+                number
+            };
+            
+            highest_assigned_number = highest_assigned_number.max(message_number);
+            
+            // Generate message name based on number
+            if enable_prefix {
+                let number_str = format!("{:0width$}", message_number, width = num_digits as usize);
+                message.generated_name = format!("{}{}_{}", prefix, number_str, message.original_name);
+            } else {
+                message.generated_name = message.original_name.clone();
+            }
+            
+            debug!("Message: {} -> Number: {}, Name: {}", 
+                  message.original_name, message_number, message.generated_name);
+        }
+    }
+    
+    highest_assigned_number
 }
 
 pub fn generate_file_header(spec: &MessageDefinition) -> String {

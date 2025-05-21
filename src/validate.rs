@@ -18,6 +18,26 @@ pub enum ValidationError {
     StructureError(String),
 }
 
+pub fn validate_message_numbering(spec: &MessageDefinition) -> Result<(), String> {
+    let mut used_numbers = std::collections::HashMap::new();
+    
+    for category in &spec.messages {
+        for message in &category.messages {
+            if let Some(number) = message.number {
+                if let Some(existing) = used_numbers.get(&number) {
+                    return Err(format!(
+                        "Duplicate message number {} used by '{}' and '{}'",
+                        number, existing, message.original_name
+                    ));
+                }
+                used_numbers.insert(number, message.original_name.clone());
+            }
+        }
+    }
+    
+    Ok(())
+}
+
 pub fn validate_schema(yaml_content: &str) -> Result<(), ValidationError> {
     // First, try to parse the YAML as our MessageDefinition type
     let spec: MessageDefinition = serde_yaml::from_str(yaml_content)

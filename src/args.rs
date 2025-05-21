@@ -60,8 +60,12 @@ pub struct Args {
     )]
     pub verbose: u8,
 
-    /// Verify that the YAML file follows the schema but don't generate code
-    #[clap(long = "validate", action = clap::ArgAction::SetTrue, default_value = "false")]
+    /// Validate that the YAML file follows the schema but don't generate code
+    #[clap(short = 'V', long = "validate", action = clap::ArgAction::SetTrue, default_value = "false")]
     pub validate_only: bool,
+
+    /// Update input YAML with explicit message numbers
+    #[clap(short = 'U', long = "update-yaml", action = clap::ArgAction::SetTrue, default_value = "false")]
+    pub update_yaml: bool,
 
 }

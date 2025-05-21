@@ -41,6 +41,7 @@ pub struct MessageSpec {
     #[serde(skip, default)]
     pub generated_name: String, // Will store the auto-numbered name
     pub description: String,
+    pub number: Option<u32>,
     pub request: MessageFieldsSpec,
     pub response: MessageFieldsSpec,
 }
