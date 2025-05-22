@@ -71,6 +71,9 @@ bumptag: ## Bump and tag the release both locally and on remote
 	updated_version=$$(cargo pkgid | cut -d# -f2 | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+)$$/$$version/"); \
 	sed -i -E "s/^version = .*/version = \"$$updated_version\"/" Cargo.toml
 	@echo "New version is $(shell cargo pkgid | cut -d# -f2)"
+	git add Cargo.toml
+	git commit -m "Bump version to v$$(cargo pkgid | cut -d# -f2)"
+	@git push origin develop
 	git tag -a v$$(cargo pkgid | cut -d# -f2) -m "Release v$$(cargo pkgid | cut -d# -f2)"
 	git push origin v$$(cargo pkgid | cut -d# -f2)
 	@echo "Tag v$$(cargo pkgid | cut -d# -f2) created and pushed to remote"
