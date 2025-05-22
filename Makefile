@@ -68,7 +68,7 @@ bumptag: ## Bump and tag the release both locally and on remote
 	@git diff --quiet || (echo "Uncommitted changes present. Please commit or stash them before tagging." && exit 1)
 	# Make sure it builds without any error before tagging
 	@cargo clean
-	@cargo build --release || (echo "Build failed! Aborting tag process." && exit 1)
+	@cargo build --release --quiet || (echo "Build failed! Aborting tag process." && exit 1)
 	@echo "Current version is $(shell cargo pkgid | cut -d# -f2)"
 	@read -p "Enter new version number: " version; \
 	updated_version=$$(cargo pkgid | cut -d# -f2 | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+)$$/$$version/"); \
@@ -81,4 +81,5 @@ bumptag: ## Bump and tag the release both locally and on remote
 	git tag -a v$$(cargo pkgid | cut -d# -f2) -m "Release v$$(cargo pkgid | cut -d# -f2)"
 	git push origin v$$(cargo pkgid | cut -d# -f2)
 	@echo "Tag v$$(cargo pkgid | cut -d# -f2) created and pushed to remote"
+	@rm Cargo.toml-E
 	@echo "Release process completed"
