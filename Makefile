@@ -64,3 +64,14 @@ release: ## Release the project using cargo
 	@echo "New version is $(shell cargo pkgid | cut -d# -f2)"
 	@echo "Release process completed"
 
+bumptag: ## Bump and tag the release both locally and on remote
+	@git diff --quiet || (echo "Uncommitted changes present. Please commit or stash them before tagging." && exit 1)
+	@echo "Current version is $(shell cargo pkgid | cut -d# -f2)"
+	@read -p "Enter new version number: " version; \
+	updated_version=$$(cargo pkgid | cut -d# -f2 | sed -E "s/([0-9]+\.[0-9]+\.[0-9]+)$$/$$version/"); \
+	sed -i -E "s/^version = .*/version = \"$$updated_version\"/" Cargo.toml
+	@echo "New version is $(shell cargo pkgid | cut -d# -f2)"
+	git tag -a v$$(cargo pkgid | cut -d# -f2) -m "Release v$$(cargo pkgid | cut -d# -f2)"
+	git push origin v$$(cargo pkgid | cut -d# -f2)
+	@echo "Tag v$$(cargo pkgid | cut -d# -f2) created and pushed to remote"
+	@echo "Release process completed"
