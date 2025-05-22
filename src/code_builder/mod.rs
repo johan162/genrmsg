@@ -56,7 +56,7 @@ impl CodeBuilder {
 
     /// Adds a Rust attribute (e.g. #[derive(...)])
     pub fn add_attribute(&mut self, attribute: &str) -> &mut Self {
-        self.add_line(&format!("#[{}]", attribute))
+        self.add_line(&format!("#[{attribute}]"))
     }
 
     /// Adds multiple lines with indentation
@@ -101,8 +101,8 @@ impl CodeBuilder {
 fn format_args_to_string(fmt: &str, args: &[&dyn std::fmt::Display]) -> String {
     let mut result = fmt.to_string();
     for (i, arg) in args.iter().enumerate() {
-        let placeholder = format!("{{{}}}", i);
-        result = result.replace(&placeholder, &format!("{}", arg));
+        let placeholder = format!("{{{i}}}");
+        result = result.replace(&placeholder, &format!("{arg}"));
     }
     result
 }

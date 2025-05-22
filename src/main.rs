@@ -48,7 +48,7 @@ fn process_input_file(
     args: &Args,
     input_file: &str,
 ) -> Result<MessageDefinition, Box<dyn std::error::Error>> {
-    info!("Reading message specification from: \"{}\"", input_file);
+    info!("Reading message specification from: \"{input_file}\"");
 
     // Read the YAML file
     let yaml_content = fs::read_to_string(input_file)?;
@@ -134,7 +134,7 @@ pub fn update_yaml_with_message_numbers(
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Create a backup of the original file
     let yaml_content = fs::read_to_string(input_file)?;
-    let backup_file = format!("{}.bak", input_file);
+    let backup_file = format!("{input_file}.bak");
     fs::write(&backup_file, &yaml_content)?;
 
     // Write updated spec with explicit message numbers
@@ -142,10 +142,9 @@ pub fn update_yaml_with_message_numbers(
     fs::write(input_file, updated_yaml)?;
 
     info!(
-        "Updated message specification with explicit numbering: {}",
-        input_file
+        "Updated message specification with explicit numbering: {input_file}"
     );
-    info!("Original file backed up to: {}", backup_file);
+    info!("Original file backed up to: {backup_file}");
 
     Ok(())
 }
@@ -195,7 +194,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if let Err(e) = validate_message_numbering(&spec) {
-        eprintln!("Error: {}", e);
+        eprintln!("Error: {e}");
         return Err(e.into());
     }
 
