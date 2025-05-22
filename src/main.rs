@@ -63,13 +63,15 @@ fn process_input_file(
     let mut spec: MessageDefinition = serde_yaml::from_str(&yaml_content)?;
 
     // Assign message numbers, respecting the prefix_messages flag
-    assign_message_numbers(
-        &mut spec,
-        &args.prefix,
-        args.start_number,
-        args.num_digits,
-        args.prefix_messages,
-    );
+    if !args.reset_numbering {
+        assign_message_numbers(
+            &mut spec,
+            &args.prefix,
+            args.start_number,
+            args.num_digits,
+            args.prefix_messages,
+        );
+    }
 
     Ok(spec)
 }
@@ -148,6 +150,21 @@ pub fn update_yaml_with_message_numbers(
     Ok(())
 }
 
+pub fn reset_message_numbering(
+    spec: &mut MessageDefinition,
+) -> Result<(), Box<dyn std::error::Error>> {
+    info!("Resetting all message numbers");
+
+    // Clear all assigned message numbers
+    for category in &mut spec.messages {
+        for message in &mut category.messages {
+            message.number = None;
+        }
+    }
+
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
@@ -155,7 +172,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     init_logging(args.verbose);
 
     // Process input file
-    let spec = process_input_file(&args, &args.input)?;
+    let mut spec = process_input_file(&args, &args.input)?;
+
+    // Reset message numbering if requested
+    if args.reset_numbering {
+        reset_message_numbering(&mut spec)?;
+        
+        // Update YAML file with reset numbering
+        update_yaml_with_message_numbers(&args.input, &spec)?;
+        info!("Message numbering has been reset in the YAML file");
+        
+        // Re-assign message numbers based on the current order
+        assign_message_numbers(
+            &mut spec,
+            &args.prefix,
+            args.start_number,
+            args.num_digits,
+            args.prefix_messages,
+        );
+        
+        info!("Message numbers have been reassigned");
+    }
 
     if let Err(e) = validate_message_numbering(&spec) {
         eprintln!("Error: {}", e);
@@ -169,7 +206,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     generate_markdown_table(&args, &spec, &output_file)?;
 
     // After generating the code
-    if args.update_yaml {
+    if args.lock_yaml && !args.reset_numbering {
         update_yaml_with_message_numbers(&args.input, &spec)?;
         info!("Message numbering has been locked in the YAML file");
     }

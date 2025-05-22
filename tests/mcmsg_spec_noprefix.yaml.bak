@@ -3,82 +3,73 @@ settings:
   module_doc: Test message defintion
   serialization_framework: bincode
 common_structs:
-  SimulationResult:
-    description: Simulation result data structure
-    fields:
-      num_iterations:
-        type: i64
-        description: Number of iterations in the simulation
-      proj_id:
-        type: i64
-        description: Project identifier
-      percentiles:
-        type: '[i64; 20]'
-        description: Stores p99, p95, ... p5
-      task_distribution:
-        type: TaskDistribution
-        description: Type of distribution used
-      sim_id:
-        type: i64
-        description: Unique identifier for the simulation
-      created_at:
-        type: DateTime<Utc>
-        description: Timestamp when simulation was created
-      proj_revision:
-        type: i64
-        description: Project revision at simulation time
   ProjectData:
     description: Project data structure used in project listings
     fields:
-      project_id:
-        type: i64
-        description: Unique identifier for the project
       num_tasks:
         type: i64
         description: Number of tasks in the project
       project_start_date:
         type: NaiveDate
         description: Project start date
+      project_id:
+        type: i64
+        description: Unique identifier for the project
       project_name:
         type: String
         description: Name of the project
       revision:
         type: i64
         description: Project revision number
+  SimulationResult:
+    description: Simulation result data structure
+    fields:
+      proj_id:
+        type: i64
+        description: Project identifier
+      num_iterations:
+        type: i64
+        description: Number of iterations in the simulation
+      task_distribution:
+        type: TaskDistribution
+        description: Type of distribution used
+      proj_revision:
+        type: i64
+        description: Project revision at simulation time
+      percentiles:
+        type: '[i64; 20]'
+        description: Stores p99, p95, ... p5
+      sim_id:
+        type: i64
+        description: Unique identifier for the simulation
+      created_at:
+        type: DateTime<Utc>
+        description: Timestamp when simulation was created
   TaskData:
     description: Task data structure used in various messages
     fields:
       revision:
         type: Option<i64>
         description: Task revision number
-      nominal_effort:
-        type: i64
-        description: Nominal effort estimate
-      task_name:
-        type: String
-        description: Name of the task
-      task_id:
-        type: Option<i64>
-        description: Unique identifier for the task
-      description:
-        type: String
-        description: Task description
-      low_effort:
-        type: i64
-        description: Low effort estimate
       high_effort:
         type: i64
         description: High effort estimate
+      nominal_effort:
+        type: i64
+        description: Nominal effort estimate
+      task_id:
+        type: Option<i64>
+        description: Unique identifier for the task
+      low_effort:
+        type: i64
+        description: Low effort estimate
+      task_name:
+        type: String
+        description: Name of the task
+      description:
+        type: String
+        description: Task description
 enums:
-  ImportFormat:
-    description: Format for importing project data
-    variants:
-    - yaml
-    - csv
-    - json
-    implement_traits:
-    - Display
-    - FromStr
   TaskDistribution:
     description: Distribution used for task effort simulation
     variants:
@@ -97,15 +88,24 @@ enums:
     implement_traits:
     - Display
     - FromStr
+  ImportFormat:
+    description: Format for importing project data
+    variants:
+    - yaml
+    - csv
+    - json
+    implement_traits:
+    - Display
+    - FromStr
 error_message:
   description: Generic error message for all possible errors
   fields:
-    error_message:
-      type: String
-      description: Human-readable error message
     error_id:
       type: u32
       description: Unique error identifier
+    error_message:
+      type: String
+      description: Human-readable error message
 messages:
 - category: Project Management
   messages:
@@ -114,26 +114,26 @@ messages:
     number: 1
     request:
       fields:
-        project_name:
-          type: String
-          description: Name of the project
         project_start_date:
           type: NaiveDate
           description: Project start date
+        project_name:
+          type: String
+          description: Name of the project
     response:
       fields:
-        project_name:
-          type: String
-          description: Name of the project
         project_start_date:
           type: NaiveDate
           description: Project start date
+        project_name:
+          type: String
+          description: Name of the project
         project_id:
           type: i64
           description: Unique identifier for the new project
   - name: DelProj
     description: Delete existing project and its simulations
-    number: 5
+    number: 2
     request:
       fields:
         project_id:
@@ -146,7 +146,7 @@ messages:
           description: Project identifier that was deleted
   - name: GetProj
     description: Get project base data
-    number: 6
+    number: 3
     request:
       fields:
         project_id:
@@ -171,7 +171,7 @@ messages:
           description: Project start date
   - name: DelAllProj
     description: Delete all stored projects and simulations
-    number: 11
+    number: 4
     request:
       fields: {}
     response:
@@ -181,20 +181,20 @@ messages:
           description: Placeholder value
   - name: GetAllProjs
     description: Get all projects
-    number: 17
+    number: 5
     request:
       fields: {}
     response:
       fields:
-        num_projs:
-          type: i64
-          description: Number of projects
         projects:
           type: Vec<ProjectData>
           description: List of projects
+        num_projs:
+          type: i64
+          description: Number of projects
   - name: EditProj
     description: Edit an existing project
-    number: 19
+    number: 6
     request:
       fields:
         project_start_date:
@@ -208,28 +208,31 @@ messages:
           description: New name for the project
     response:
       fields:
+        revision:
+          type: i64
+          description: New project revision number
         num_tasks:
           type: i64
           description: Number of tasks in the project
+        project_start_date:
+          type: NaiveDate
+          description: Updated project start date
         project_id:
           type: i64
           description: Project identifier
         project_name:
           type: String
           description: Updated project name
-        revision:
-          type: i64
-          description: New project revision number
-        project_start_date:
-          type: NaiveDate
-          description: Updated project start date
 - category: Task Management
   messages:
   - name: AddTask
     description: Add task to existing project
-    number: 2
+    number: 7
     request:
       fields:
+        project_id:
+          type: i64
+          description: Project identifier
         high_effort:
           type: i64
           description: High effort estimate
@@ -239,9 +242,6 @@ messages:
         nominal_effort:
           type: i64
           description: Nominal effort estimate
-        project_id:
-          type: i64
-          description: Project identifier
         low_effort:
           type: i64
           description: Low effort estimate
@@ -256,73 +256,73 @@ messages:
         project_id:
           type: i64
           description: Project identifier
+        nominal_effort:
+          type: i64
+          description: Nominal effort estimate
+        description:
+          type: String
+          description: Task description
         task_id:
           type: i64
           description: Unique identifier for the new task
+        low_effort:
+          type: i64
+          description: Low effort estimate
         task_name:
           type: String
           description: Name of the task
-        description:
-          type: String
-          description: Task description
-        low_effort:
-          type: i64
-          description: Low effort estimate
-        nominal_effort:
-          type: i64
-          description: Nominal effort estimate
   - name: EditTask
     description: Edit existing task
-    number: 3
+    number: 8
     request:
       fields:
-        low_effort:
-          type: i64
-          description: Low effort estimate
-        description:
-          type: String
-          description: Task description
         task_id:
           type: i64
           description: Task identifier to edit
-        task_name:
+        description:
           type: String
-          description: Name of the task
-        nominal_effort:
-          type: i64
-          description: Nominal effort estimate
-        project_id:
-          type: i64
-          description: Project identifier
-        high_effort:
-          type: i64
-          description: High effort estimate
-    response:
-      fields:
+          description: Task description
         low_effort:
           type: i64
           description: Low effort estimate
+        nominal_effort:
+          type: i64
+          description: Nominal effort estimate
+        high_effort:
+          type: i64
+          description: High effort estimate
         task_name:
           type: String
           description: Name of the task
-        task_id:
+        project_id:
           type: i64
-          description: Task identifier
+          description: Project identifier
+    response:
+      fields:
+        nominal_effort:
+          type: i64
+          description: Nominal effort estimate
         description:
           type: String
           description: Task description
         project_id:
           type: i64
           description: Project identifier
-        nominal_effort:
-          type: i64
-          description: Nominal effort estimate
         high_effort:
           type: i64
           description: High effort estimate
+        task_id:
+          type: i64
+          description: Task identifier
+        low_effort:
+          type: i64
+          description: Low effort estimate
+        task_name:
+          type: String
+          description: Name of the task
   - name: DelTask
     description: Delete existing task
-    number: 4
+    number: 9
     request:
       fields:
         project_id:
@@ -333,23 +333,23 @@ messages:
           description: Task identifier to delete
     response:
       fields:
+        project_id:
+          type: i64
+          description: Project identifier
         task_id:
           type: i64
           description: Task identifier that was deleted
+  - name: GetTask
+    description: Get task data
+    number: 10
+    request:
+      fields:
         project_id:
           type: i64
           description: Project identifier
-  - name: GetTask
-    description: Get task data
-    number: 7
-    request:
-      fields:
         task_id:
           type: i64
           description: Task identifier to retrieve
-        project_id:
-          type: i64
-          description: Project identifier
     response:
       fields:
         description:
@@ -358,27 +358,27 @@ messages:
         project_id:
           type: i64
           description: Project identifier
+        nominal_effort:
+          type: i64
+          description: Nominal effort estimate
         task_name:
           type: String
           description: Name of the task
         low_effort:
           type: i64
           description: Low effort estimate
+        revision:
+          type: i64
+          description: Task revision number
         high_effort:
           type: i64
           description: High effort estimate
         task_id:
           type: i64
           description: Task identifier
-        nominal_effort:
-          type: i64
-          description: Nominal effort estimate
-        revision:
-          type: i64
-          description: Task revision number
   - name: GetAllTasks
     description: Get all tasks for a given project
-    number: 8
+    number: 11
     request:
       fields:
         project_id:
@@ -386,17 +386,17 @@ messages:
           description: Project identifier
     response:
       fields:
-        num_tasks:
-          type: i64
-          description: Number of tasks in the project
         tasks:
           type: Vec<TaskData>
           description: List of tasks in the project
+        num_tasks:
+          type: i64
+          description: Number of tasks in the project
 - category: Simulation Management
   messages:
   - name: DelSimulation
     description: Delete all stored simulations for a given project
-    number: 9
+    number: 12
     request:
       fields:
         project_id:
@@ -409,7 +409,7 @@ messages:
           description: Project identifier
   - name: DelAllSimulations
     description: Delete all stored simulations
-    number: 10
+    number: 13
     request:
       fields: {}
     response:
@@ -419,7 +419,7 @@ messages:
           description: Placeholder value
   - name: GetSim
     description: Get simulation data by ID
-    number: 21
+    number: 14
     request:
       fields:
         sim_id:
@@ -427,15 +427,15 @@ messages:
           description: Simulation identifier
     response:
       fields:
-        sim_id:
-          type: i64
-          description: Simulation identifier
         simulation:
           type: Option<SimulationResult>
           description: The simulation result, if found
+        sim_id:
+          type: i64
+          description: Simulation identifier
   - name: LastSim
     description: Get last simulation for project
-    number: 13
+    number: 15
     request:
       fields:
         project_id:
@@ -443,15 +443,15 @@ messages:
           description: Project identifier
     response:
       fields:
-        project_id:
-          type: i64
-          description: Project identifier
         simulation:
           type: Option<SimulationResult>
           description: The last simulation result, if any
+        project_id:
+          type: i64
+          description: Project identifier
   - name: GetAllProjectSimulations
     description: Get all simulations for a given project
-    number: 18
+    number: 16
     request:
       fields:
         project_id:
@@ -459,17 +459,17 @@ messages:
           description: Project identifier
     response:
       fields:
-        simulations:
-          type: Vec<SimulationResult>
-          description: List of simulation results
         num_sims:
           type: i64
           description: Number of simulations
+        simulations:
+          type: Vec<SimulationResult>
+          description: List of simulation results
 - category: Configuration
   messages:
   - name: GetConfig
     description: Get simulation configuration
-    number: 14
+    number: 17
     request:
       fields: {}
     response:
@@ -482,28 +482,28 @@ messages:
           description: Distribution used for task effort
   - name: SetConfig
     description: Set simulation configuration
-    number: 15
+    number: 18
     request:
       fields:
-        task_distribution:
-          type: TaskDistribution
-          description: Distribution used for task effort
         num_iterations:
           type: i64
           description: Number of iterations for simulation
+        task_distribution:
+          type: TaskDistribution
+          description: Distribution used for task effort
     response:
       fields:
-        task_distribution:
-          type: TaskDistribution
-          description: Distribution used for task effort
         num_iterations:
           type: i64
           description: Number of iterations for simulation
+        task_distribution:
+          type: TaskDistribution
+          description: Distribution used for task effort
 - category: Import/Export
   messages:
   - name: Export
     description: Export a project to YAML or CSV
-    number: 12
+    number: 19
     request:
       fields:
         project_id:
@@ -514,26 +514,26 @@ messages:
           description: Format to export (yaml, csv, json)
     response:
       fields:
-        export_format:
-          type: ExportFormat
-          description: Format of export
         exported_data:
           type: String
           description: Exported project data
+        export_format:
+          type: ExportFormat
+          description: Format of export
         project_id:
           type: i64
           description: Project identifier
   - name: Import
     description: Import a project from a YAML or CSV file
-    number: 16
+    number: 20
     request:
       fields:
-        import_data:
-          type: String
-          description: Project data to import
         import_format:
           type: ImportFormat
           description: Format to import (yaml, csv, json)
+        import_data:
+          type: String
+          description: Project data to import
     response:
       fields:
         import_format:
@@ -546,7 +546,7 @@ messages:
   messages:
   - name: Simulate
     description: Run a simulation for a given project
-    number: 20
+    number: 21
     request:
       fields:
         project_id:
@@ -565,18 +565,18 @@ messages:
         project_id:
           type: i64
           description: Project identifier
-        project_revision:
-          type: i64
-          description: Project revision at simulation time
-        task_distribution:
-          type: TaskDistribution
-          description: Distribution used for task effort
-        num_iterations:
-          type: i64
-          description: Number of iterations in the simulation
         percentiles:
           type: '[i64; 20]'
           description: Stores p99, p95, ... p5
+        num_iterations:
+          type: i64
+          description: Number of iterations in the simulation
+        task_distribution:
+          type: TaskDistribution
+          description: Distribution used for task effort
+        project_revision:
+          type: i64
+          description: Project revision at simulation time
     response:
       fields:
         sim_id:

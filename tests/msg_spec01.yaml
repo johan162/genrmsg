@@ -285,4 +285,3 @@ messages:
               type: "i64"
               description: "Unique identifier for the new task"
 
-      # Additional task messages would follow the same pattern...

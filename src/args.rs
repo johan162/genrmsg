@@ -43,8 +43,8 @@ pub struct Args {
     )]
     pub num_digits: u8,
 
-    /// Enable prefixing of message names (enabled by default)
-    #[clap(short = 'm', long = "prefix-messages", action = clap::ArgAction::Set, default_value = "true")]
+    /// Enable prefixing of message names (disabled by default)
+    #[clap(short = 'm', long = "prefix-messages", action = clap::ArgAction::SetTrue, default_value = "false")]
     pub prefix_messages: bool,
 
     /// Generate a Markdown table documenting all messages. Same name as the input file with .md extension.
@@ -61,11 +61,15 @@ pub struct Args {
     pub verbose: u8,
 
     /// Validate that the YAML file follows the schema but don't generate code
-    #[clap(short = 'V', long = "validate", action = clap::ArgAction::SetTrue, default_value = "false")]
+    #[clap(short = 'y', long = "validate-yaml", action = clap::ArgAction::SetTrue, default_value = "false")]
     pub validate_only: bool,
 
-    /// Update input YAML with explicit message numbers
-    #[clap(short = 'U', long = "update-yaml", action = clap::ArgAction::SetTrue, default_value = "false")]
-    pub update_yaml: bool,
+    /// Lock the last generated prefix numbers in YAML so all messages get the same number next time
+    #[clap(short = 'l', long = "lock-yaml", action = clap::ArgAction::SetTrue, default_value = "false")]
+    pub lock_yaml: bool,
+
+    /// Reset all message numbering (for major version changes)
+    #[clap(short = 'R', long = "reset-numbering", action = clap::ArgAction::SetTrue, default_value = "false")]
+    pub reset_numbering: bool,
 
 }
