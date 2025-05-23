@@ -73,6 +73,13 @@ fn process_input_file(
         );
     }
 
+    // Sort all messages in each category by generated name
+    for category in &mut spec.messages {
+        category.messages.sort_by(|a, b| a.generated_name.cmp(&b.generated_name));
+    }
+
+    
+
     Ok(spec)
 }
 

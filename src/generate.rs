@@ -285,10 +285,15 @@ pub fn generate_message_structs(spec: &MessageDefinition) -> (String, Vec<(Strin
             builder.add_line(&format!("pub struct {request_name} {{"));
 
             builder.indent();
-            for (field_name, field) in &message.request.fields {
+
+            let mut keys = message.request.fields.keys().collect::<Vec<_>>();
+            keys.sort();
+            for field_name in keys {
+                let field = message.request.fields.get(field_name).unwrap();
                 builder.add_doc_comment(&field.description);
                 builder.add_line(&format!("pub {}: {},", field_name, field.type_name));
             }
+
             builder.dedent();
 
             builder.add_line("}");
@@ -300,10 +305,15 @@ pub fn generate_message_structs(spec: &MessageDefinition) -> (String, Vec<(Strin
             builder.add_line(&format!("pub struct {response_name} {{"));
 
             builder.indent();
-            for (field_name, field) in &message.response.fields {
+
+            let mut keys = message.response.fields.keys().collect::<Vec<_>>();
+            keys.sort();
+            for field_name in keys {
+                let field = message.response.fields.get(field_name).unwrap();
                 builder.add_doc_comment(&field.description);
                 builder.add_line(&format!("pub {}: {},", field_name, field.type_name));
             }
+
             builder.dedent();
 
             builder.add_line("}");
@@ -326,6 +336,12 @@ pub fn generate_message_enum(message_enum_variants: &[(String, String)]) -> Stri
     builder.add_line("/// A wrapper enum for all message types");
     builder.add_attribute("derive(Debug, Clone, Serialize, Deserialize)");
     builder.block("pub enum Message {", "}", |builder| {
+
+        // Sort all messages according to their generated name
+        let mut sorted_variants = message_enum_variants.to_vec();
+        sorted_variants.sort_by(|a, b| a.0.cmp(&b.0));
+        let message_enum_variants = sorted_variants;
+
         // Message variants
         for (request, response) in message_enum_variants {
             builder.add_line(&format!("{request}({request}),"));
