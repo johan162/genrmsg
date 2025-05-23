@@ -74,11 +74,19 @@ fn process_input_file(
     }
 
     // Sort all messages in each category by generated name
-    for category in &mut spec.messages {
-        category.messages.sort_by(|a, b| a.generated_name.cmp(&b.generated_name));
+    if args.prefix_messages {
+        for category in &mut spec.messages {
+            category
+                .messages
+                .sort_by(|a, b| a.generated_name.cmp(&b.generated_name));
+        }
+    } else {
+        for category in &mut spec.messages {
+            category
+                .messages
+                .sort_by(|a, b| a.original_name.cmp(&b.original_name));
+        }
     }
-
-    
 
     Ok(spec)
 }
@@ -148,9 +156,7 @@ pub fn update_yaml_with_message_numbers(
     let updated_yaml = serde_yaml::to_string(spec)?;
     fs::write(input_file, updated_yaml)?;
 
-    info!(
-        "Updated message specification with explicit numbering: {input_file}"
-    );
+    info!("Updated message specification with explicit numbering: {input_file}");
     info!("Original file backed up to: {backup_file}");
 
     Ok(())
@@ -183,11 +189,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Reset message numbering if requested
     if args.reset_numbering {
         reset_message_numbering(&mut spec)?;
-        
+
         // Update YAML file with reset numbering
         update_yaml_with_message_numbers(&args.input, &spec)?;
         info!("Message numbering has been reset in the YAML file");
-        
+
         // Re-assign message numbers based on the current order
         assign_message_numbers(
             &mut spec,
@@ -196,7 +202,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             args.num_digits,
             args.prefix_messages,
         );
-        
+
         info!("Message numbers have been reassigned");
     }
 
