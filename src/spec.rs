@@ -55,8 +55,8 @@ pub struct MessageCategory {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MessageDefinition {
     pub settings: Settings,
-    pub common_structs: HashMap<String, StructSpec>,
-    pub enums: HashMap<String, EnumSpec>,
-    pub error_message: StructSpec,
+    pub common_structs: Option<HashMap<String, StructSpec>>,
+    pub enums: Option<HashMap<String, EnumSpec>>,
+    pub error_message: Option<StructSpec>,
     pub messages: Vec<MessageCategory>,
 }

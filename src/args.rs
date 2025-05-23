@@ -9,7 +9,7 @@ pub use clap::Parser;
 )]
 pub struct Args {
     /// Sets the input YAML file
-    #[clap(short = 'i', long = "input", value_name = "FILE", required = true)]
+    #[clap(value_name = "INPUT_SPECIFICATION")]
     pub input: String,
 
     /// Sets the output Rust file (overrides the one in YAML if specified)
