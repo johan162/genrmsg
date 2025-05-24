@@ -5,7 +5,7 @@ pub use clap::Parser;
     name = "genrmsg",
     about = "Generate Rust message code from YAML specification",
     author = "Johan Persson <johan162@gmail.com>",
-    version = "1.0"
+    version = "1.1.0"
 )]
 pub struct Args {
     /// Sets the input YAML file

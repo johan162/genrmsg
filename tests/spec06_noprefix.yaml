@@ -1,5 +1,5 @@
 settings:
-  output_file: ./msg_lib.rs
+  output_file: spec06.rs.txt
   module_doc: Test message defintion
   serialization_framework: bincode
 common_structs:

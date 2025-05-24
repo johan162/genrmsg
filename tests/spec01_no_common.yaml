@@ -1,0 +1,216 @@
+# Global settings
+settings:
+  output_file: "spec01.rs.txt"
+  module_doc: "Example Message definitions"
+  serialization_framework: "bincode"
+
+# Enums used in various messages
+enums:
+  TaskDistribution:
+    description: "Distribution used for task effort simulation"
+    variants:
+      - Triangle
+      - Beta
+      - Uniform
+    implement_traits:
+      - Display
+      - FromStr
+
+  ImportFormat:
+    description: "Format for importing project data"
+    variants:
+      - yaml
+      - csv
+      - json
+    implement_traits:
+      - Display
+      - FromStr
+
+  ExportFormat:
+    description: "Format for exporting project data"
+    variants:
+      - yaml
+      - csv
+      - json
+    implement_traits:
+      - Display
+      - FromStr
+
+# Error message definition
+error_message:
+  name: "M900_Error"
+  description: "Generic error message"
+  fields:
+    error_id:
+      type: "u32"
+      description: "Unique error identifier"
+    error_message:
+      type: "String"
+      description: "Human-readable error message"
+
+# Message definitions grouped by category
+messages:
+  - category: "Project Management"
+    messages:
+      - name: "M001_NewProj"
+        description: "Create a new project"
+        request:
+          fields:
+            project_name:
+              type: "String"
+              description: "Name of the project"
+            project_start_date:
+              type: "NaiveDate"
+              description: "Project start date"
+        response:
+          fields:
+            project_name:
+              type: "String"
+              description: "Name of the project"
+            project_start_date:
+              type: "NaiveDate"
+              description: "Project start date"
+            project_id:
+              type: "i64"
+              description: "Unique identifier for the new project"
+
+      - name: "M005_DelProj"
+        description: "Delete existing project and its simulations"
+        request:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier to delete"
+        response:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier that was deleted"
+
+      - name: "M006_GetProj"
+        description: "Get project base data"
+        request:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier to retrieve"
+        response:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier"
+            project_name:
+              type: "String"
+              description: "Name of the project"
+            project_start_date:
+              type: "NaiveDate"
+              description: "Project start date"
+            num_tasks:
+              type: "i64"
+              description: "Number of tasks in the project"
+            revision:
+              type: "i64"
+              description: "Project revision number"
+
+      - name: "M011_DelAllProj"
+        description: "Delete all stored projects and simulations"
+        request:
+          fields: {} # Empty payload
+        response:
+          fields:
+            placeholder:
+              type: "i64"
+              description: "Placeholder value"
+
+      - name: "M017_GetAllProjs"
+        description: "Get all projects"
+        request:
+          fields: {} # Empty payload
+        response:
+          fields:
+            num_projs:
+              type: "i64"
+              description: "Number of projects"
+            projects:
+              type: "Vec<ProjectData>"
+              description: "List of projects"
+
+      - name: "M019_EditProj"
+        description: "Edit an existing project"
+        request:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier to edit"
+            project_name:
+              type: "String"
+              description: "New name for the project"
+            project_start_date:
+              type: "NaiveDate"
+              description: "New project start date"
+        response:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier"
+            project_name:
+              type: "String"
+              description: "Updated project name"
+            project_start_date:
+              type: "NaiveDate"
+              description: "Updated project start date"
+            num_tasks:
+              type: "i64"
+              description: "Number of tasks in the project"
+            revision:
+              type: "i64"
+              description: "New project revision number"
+
+  - category: "Task Management"
+    messages:
+      - name: "M002_AddTask"
+        description: "Add task to existing project"
+        request:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier"
+            task_name:
+              type: "String"
+              description: "Name of the task"
+            description:
+              type: "String"
+              description: "Task description"
+            low_effort:
+              type: "i64"
+              description: "Low effort estimate"
+            nominal_effort:
+              type: "i64"
+              description: "Nominal effort estimate"
+            high_effort:
+              type: "i64"
+              description: "High effort estimate"
+        response:
+          fields:
+            project_id:
+              type: "i64"
+              description: "Project identifier"
+            task_name:
+              type: "String"
+              description: "Name of the task"
+            description:
+              type: "String"
+              description: "Task description"
+            low_effort:
+              type: "i64"
+              description: "Low effort estimate"
+            nominal_effort:
+              type: "i64"
+              description: "Nominal effort estimate"
+            high_effort:
+              type: "i64"
+              description: "High effort estimate"
+            task_id:
+              type: "i64"
+              description: "Unique identifier for the new task"
+

@@ -1,6 +1,6 @@
 # Global settings
 settings:
-  output_file: "./msg_example_lib.rs"
+  output_file: "spec02.rs.txt"
   module_doc: "Example Message definitions"
   serialization_framework: "bincode"
 
@@ -74,38 +74,6 @@ common_structs:
       percentiles:
         type: "[i64; 20]"
         description: "Stores p99, p95, ... p5"
-
-# Enums used in various messages
-enums:
-  TaskDistribution:
-    description: "Distribution used for task effort simulation"
-    variants:
-      - Triangle
-      - Beta
-      - Uniform
-    implement_traits:
-      - Display
-      - FromStr
-
-  ImportFormat:
-    description: "Format for importing project data"
-    variants:
-      - yaml
-      - csv
-      - json
-    implement_traits:
-      - Display
-      - FromStr
-
-  ExportFormat:
-    description: "Format for exporting project data"
-    variants:
-      - yaml
-      - csv
-      - json
-    implement_traits:
-      - Display
-      - FromStr
 
 # Error message definition
 error_message:
